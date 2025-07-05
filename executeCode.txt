@@ -1,0 +1,56 @@
+# —— 一键复现 AI 虚拟主播项目 全流程 —— #
+
+# 1. 在 PowerShell（管理员）中启用 WSL2 并安装 Ubuntu
+wsl --install
+
+# 2. 安装并配置 Docker Desktop → Settings → Resources → WSL Integration → 勾选 Ubuntu-22.04
+
+# 3. 进入 WSL2 终端，克隆项目
+cd ~
+git clone https://<your-git-host>/ai-vtuber.git
+cd ai-vtuber
+
+# 4. （如遇 YAML 解析错误）清理 BOM/CRLF
+sudo apt update
+sudo apt install -y dos2unix
+dos2unix docker-compose.yml
+
+# 5. 检查 Docker 与 Compose
+docker --version
+docker compose version
+
+# 6. 构建并后台启动所有服务（MySQL、Redis、NLP、TTS、后端、前端）
+docker compose up --build -d
+
+# 7. 查看服务运行状态
+docker compose ps
+
+# 8. 查看实时日志（整体或单服务）
+docker compose logs -f
+docker logs -f vtuber_nlp
+
+# 9. 快速接口连通性测试
+curl -v -X POST http://localhost:8182/api/nlp/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"测试一下"}'
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"input":"测试","response":"回复"}'
+curl -X POST http://localhost:8183/api/tts/synthesize \
+  -H "Content-Type: application/json" \
+  -d '{"text":"语音测试"}' --output test.mp3
+
+# 10. 本地前端 Dev Server 运行（可选）
+curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
+source ~/.bashrc
+nvm install 18
+nvm use 18
+cd ~/ai-vtuber/frontend
+npm install
+chmod +x node_modules/.bin/vite
+npm run dev -- --host 0.0.0.0
+
+# 11. 在 VS Code 中使用 Remote-WSL 无缝开发
+cd ~/ai-vtuber
+code .
+# 然后在 VS Code 中执行 "Remote-WSL: Reopen Folder in WSL"

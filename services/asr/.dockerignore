@@ -1,0 +1,8 @@
+# 只保留源代码
+__pycache__
+*.wav
+*.mp3
+*.log
+node_modules
+frontend/dist
+.env

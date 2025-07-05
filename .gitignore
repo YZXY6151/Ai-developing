@@ -1,0 +1,77 @@
+# === 通用日志文件 ===
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# === Python 缓存与虚拟环境 ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.egg-info/
+.venv/
+venv/
+services/**/venv/
+
+# === 大模型与权重文件 ===
+models/
+ollama_models/
+*.bin
+*.ckpt
+*.safetensors
+
+# === Node.js 构建与依赖 ===
+node_modules/
+dist/
+dist-ssr/
+out/
+.cache/
+*.local
+
+# === 环境变量文件 ===
+.env
+.env.local
+.env.*.local
+
+# === 临时数据文件（音频等） ===
+*.wav
+*.mp3
+
+# === 编辑器和系统文件 ===
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === Docker 构建缓存（如有使用） ===
+*.docker
+*.tar
+docker-compose.override.yml
+
+# === Jupyter（如使用）===
+.ipynb_checkpoints/
+
+# === Git LFS 相关文件 ===
+*.lfs
+
+# === Windows 无效路径字符（Git checkout 会失败）===
+*:*  # 忽略所有含有冒号（:）的路径文件
+
+# === Live2D 模型资源（可视情况添加特定模型）===
+frontend/public/live2d/
+
+# === 临时或用户生成的打包列表（可选）===
+all-files.txt

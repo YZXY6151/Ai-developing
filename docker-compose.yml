@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  # 数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: vtuber_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: ai_vtuber
+      MYSQL_USER: vtuber
+      MYSQL_PASSWORD: vtuberpwd
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 缓存 / 消息队列
+  redis:
+    image: redis:6-alpine
+    container_name: vtuber_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NLP 服务（GPT）
+  nlp:
+    build:
+      context: ./services/nlp
+      dockerfile: Dockerfile
+    container_name: vtuber_nlp
+    ports:
+      - "8182:8182"
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:5173
+      - TRANSFORMER_MODEL=Qwen/Qwen1.5-1.8B-Chat
+      - GEN_TEMP=0.7
+      - TOP_P=0.9
+      - SYSTEM_PROMPT=你是一位亲切专业的中文虚拟主播，用简短自然的中文回答用户。
+    # 如果 NLP 依赖数据库或 Redis，可按需启用：
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # TTS 服务
+  tts:
+    build:
+      context: ./services/tts
+      dockerfile: Dockerfile
+    container_name: vtuber_tts
+    ports:
+      - "8183:8183"
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:5173
+    depends_on:
+      nlp:
+        condition: service_started
+
+  # 前端应用（纯文本输入）
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vtuber_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_NLP_URL=http://localhost:8182
+      - VITE_TTS_URL=http://localhost:8183
+    depends_on:
+      nlp:
+        condition: service_started
+      tts:
+        condition: service_started
+
+volumes:
+  mysql-data:
+  redis-data:

@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+transformers
+torch
+transformers>=4.39
+accelerate       
+sentencepiece
+python-dotenv
+pydantic
+requests
